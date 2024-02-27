@@ -8,7 +8,6 @@ const configOptions = {
 const connectToDB = async () => {
   const connectionUrl =
     "mongodb+srv://akashpawargadre256:akash12345@ecomrce1.awlatqr.mongodb.net/";
-    // akash12345
   mongoose
     .connect(connectionUrl, configOptions)
     .then(() => console.log("Ecommerce database connected successfully!"))
