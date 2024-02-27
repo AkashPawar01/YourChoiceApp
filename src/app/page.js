@@ -1,113 +1,236 @@
-import Image from "next/image";
+"use client";
+
+import { GlobalContext } from "@/context";
+import { getAllAdminProducts } from "@/services/product";
+import { useRouter } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+import { FaFacebookF, FaTwitter, FaYoutube, FaInstagram } from "react-icons/fa";
+import { BsLinkedin, BsGithub } from "react-icons/bs";
+import {CiLinkedin} from "react-icons/ci"
 
 export default function Home() {
+  const { isAuthUser } = useContext(GlobalContext);
+  const [textareaValue, setTextareaValue] = useState('');
+
+
+  const [products, setProducts] = useState([]);
+  const router = useRouter();
+
+  const handleTextareaChange = (e) => {
+    setTextareaValue(e.target.value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Textarea value submitted:', textareaValue);
+  };
+
+  async function getListOfProducts() {
+    const res = await getAllAdminProducts();
+
+    if (res.success) {
+      setProducts(res.data);
+    }
+  }
+
+  useEffect(() => {
+    getListOfProducts();
+  }, []);
+
+  console.log(products);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className="flex min-h-screen flex-col items-center justify-between p-24 overflow-hidden">
+      <section className="">
+        <div className="grid max-w-screen-xl px-4 py-8 mx-suto  lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
+          <div className="mr-auto place-self-center lg:col-span-7">
+            <h1 className="max-w-2xl mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl">
+              Best Fashion Collection
+            </h1>
+            <p className="max-w-2xl mb-6 font-light text-gray-700 lg:mb-8 md:text-lg lg:text-xl">
+              Quisquemos sodales suscipit tortor ditaemcos condimentum de cosmo
+              lacus meleifend menean diverra loremous.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => router.push("/product/listing/all-products")}
+              className="mt-1.5 inline-block bg-blue-700 rounded-lg transition-all duration-200 px-5 py-4 text-xs font-medium uppercase tracking-wide text-white hover:bg-blue-600"
+            >
+              Explore Shop Collection
+            </button>
+          </div>
+          <div className="hidden lg:mt-0 lg:col-span-5 lg:flex">
+            <img src="https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" />
+          </div>
         </div>
-      </div>
+        <div className="max-w-screen-xl px-4 py-8 mx-auto sm:py-12 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:items-stretch">
+            <div className="grid p-6 bg-gray-100 rounded place-content-center sm:p-8">
+              <div className="max-w-md mx-auto text-center lg:text-left">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 sm:text-3xl">
+                    Summer Sale Collection
+                  </h2>
+                </div>
+                <button
+                  onClick={() => router.push("/product/listing/all-products")}
+                  className="mt-1.5 inline-block bg-blue-800 px-5 py-3 text-xs font-medium uppercase tracking-wider text-white transition-all duration-200 hover:bg-blue-700 rounded-lg"
+                >
+                  Shop ALL
+                </button>
+              </div>
+            </div>
+            <div className="lg:col-span-2 lg:py-8">
+              <ul className="grid grid-cols-2 gap-4">
+                {products && products.length
+                  ? products
+                      .filter((item) => item.onSale === "yes")
+                      .splice(0, 2)
+                      .map((productItem) => (
+                        <li
+                          onClick={() =>
+                            router.push(`/product/${productItem._id}`)
+                          }
+                          className="cursor-pointer"
+                          key={productItem._id}
+                        >
+                          <div>
+                            <img
+                              src={productItem.imageUrl}
+                              alt="Sale Product Item"
+                              className="object-cover w-full rounded aspect-square"
+                            />
+                          </div>
+                          <div className="mt-3">
+                            <h3 className="font-medium text-gray-900">
+                              {productItem.name}
+                            </h3>
+                            <p className="mt-1 text-sm text-gray-800">
+                              ${productItem.price}{" "}
+                              <span className="text-red-700">{`(-${productItem.priceDrop}%) Off`}</span>
+                            </p>
+                          </div>
+                        </li>
+                      ))
+                  : null}
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-screen-xl px-4 py-8 mx-auto sm:px-6 sm:py-12 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-gray-950 sm:text-3xl">
+              SHOP BY CATEGORY
+            </h2>
+          </div>
+          <ul className="grid grid-cols-1 gap-4 mt-8 lg:grid-cols-3">
+            <li>
+              <div className="relative block group">
+                <img
+                  src="https://images.unsplash.com/photo-1566454544259-f4b94c3d758c?q=80&w=1780&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                  className="object-cover w-full aspect-square"
+                />
+                <div className="absolute inset-0 flex flex-col items-start justify-end p-6">
+                  <h3 className="text-xl font-medium text-black">KIDS</h3>
+                  <button
+                    onClick={() => router.push("/product/listing/kids")}
+                    className="mt-1.5 inline-block bg-blue-800 px-5 py-3 text-xs font-medium uppercase tracking-wider text-white transition-all duration-200 hover:bg-blue-700 rounded-md"
+                  >
+                    Shop Now
+                  </button>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div className="relative block group">
+                <img
+                  src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                  className="object-cover w-full aspect-square"
+                />
+                <div className="absolute inset-0 flex flex-col items-start justify-end p-6">
+                  <h3 className="text-xl font-medium text-black">WOMEN</h3>
+                  <button
+                    onClick={() => router.push("/product/listing/women")}
+                    className="mt-1.5 inline-block bg-blue-800 px-5 py-3 text-xs font-medium uppercase tracking-wider text-white transition-all duration-200 hover:bg-blue-700 rounded-md"
+                  >
+                    Shop Now
+                  </button>
+                </div>
+              </div>
+            </li>
+            <li className="lg:col-span-2 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+              <div className="relative block group">
+                <img
+                  src="https://images.unsplash.com/photo-1555529669-2269763671c0?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                  className="object-cover w-full aspect-square"
+                />
+                <div className="absolute inset-0 flex flex-col items-start justify-end p-6">
+                  <h3 className="text-xl font-medium text-white">MEN</h3>
+                  <button
+                    onClick={() => router.push("/product/listing/men")}
+                    className="mt-1.5 inline-block bg-blue-800 px-5 py-3 text-xs font-medium uppercase tracking-wider text-white transition-all duration-200 hover:bg-blue-700 rounded-md"
+                  >
+                    Shop Now
+                  </button>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+      <footer className=" pt-14 pb-3  text-black md:h-full overflow-hidden">
+        <div className="flex gap-[50px] md:gap-[75px] lg:gap-[100px] flex-col md:flex-row">
+          <div className="w-screen mt-0 mr-0 mb-0 ml-0 relative">
+            
+            
+            <form className="flex items-center justify-center gap-3 w-screen overflow-hidden" onSubmit={handleSubmit}>
+              <label className="flex items-center justify-center font-semibold">
+                Give Feedback:
+                <textarea
+                  value={textareaValue}
+                  onChange={handleTextareaChange}
+                  className="ml-1 rounded-2xl  border placeholder-gray-400 focus:outline-none transition-all h-12 duration-300 focus:border-blue-800 w-28 md:w-96 md:ml-2 text-[12px] pl-2 pr-2 pt-[10px] pb-[1px] text-base block bg-white border-gray-600 "
+                />
+              </label>
+              <br />
+              <button className="disabled:opacity-50 inline-flex  items-center justify-center bg-blue-800 px-6 py-3 h-12 text-lg rounded-lg w-24 ml-[-10px]
+                   text-white transition-all duration-200 ease-in-out focus:shadow font-medium uppercase tracking-wider  hover:bg-blue-700 md:h-10 md:py-6 md:w-28 md:ml-2" type="submit">Submit</button>
+            </form>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+          </div>
+        </div>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+        {/* icon START */}
+        <div className="flex items-center w-screen gap-6 justify-center h-[15vh] bg-gray-100 md:flex-row md:items-center md:justify-center">
+          <div
+            onClick={() => {
+              window.open(
+                "https://www.linkedin.com/in/akash-pawar-gadre-242a65252",
+                "_blank"
+              );
+            }}
+            className="w-11 h-11 rounded-full flex items-center justify-center border-2 text-black transition-all duration-200  hover:text-blue-800 cursor-pointer hover:border-blue-800"
+          >
+            <CiLinkedin size={30} />
+          </div>
+          <div
+            onClick={() => {
+              window.open("https://github.com/AkashPawar01", "_blank");
+            }}
+            className="w-11 h-11 rounded-full flex items-center justify-center border-2 text-black transition-all duration-200  hover:text-blue-800 cursor-pointer hover:border-blue-800"
+          >
+            <BsGithub size={30} />
+          </div>
+          <div className="w-11 h-11 rounded-full flex items-center justify-center border-2 text-black transition-all duration-200  hover:text-blue-800 cursor-pointer hover:border-blue-800">
+            <FaYoutube size={30} />
+          </div>
+          <div className="w-11 h-11 rounded-full flex items-center justify-center border-2 transition-all duration-200  text-black hover:text-blue-800 cursor-pointer hover:border-blue-800">
+            <FaInstagram size={30} />
+          </div>
+        </div>
+        {/* icon END */}
+      </footer> 
     </main>
   );
 }
